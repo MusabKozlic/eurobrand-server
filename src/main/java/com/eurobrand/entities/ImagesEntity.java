@@ -16,4 +16,7 @@ public class ImagesEntity {
     @JoinColumn(name = "product_id")
     @ManyToOne
     private ProductEntity product;
+
+    @Column(name = "image_url")
+    private String imageUrl;
 }

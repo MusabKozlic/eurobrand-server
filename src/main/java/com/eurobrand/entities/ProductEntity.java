@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Entity
 @Table(name = "product")
 @Getter
@@ -17,7 +19,7 @@ public class ProductEntity {
     private String model;
     private String description;
     private Integer stock;
-
+    private Integer price;
     @JoinColumn(name = "category_id")
     @ManyToOne
     private CategoryEntity category;
