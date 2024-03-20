@@ -4,6 +4,7 @@ import com.eurobrand.dto.ProductSearchDto;
 import com.eurobrand.entities.OrderDetailsEntity;
 import com.eurobrand.entities.ProductEntity;
 import com.eurobrand.services.OrderDetailsService;
+import jakarta.mail.MessagingException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,7 @@ public class OrderDetailsController {
     private OrderDetailsService service;
 
     @PostMapping
-    public OrderDetailsEntity postOrder(@RequestBody OrderDetailsDto order) {
+    public OrderDetailsEntity postOrder(@RequestBody OrderDetailsDto order) throws MessagingException {
         return service.postOrder(order);
     }
 }
