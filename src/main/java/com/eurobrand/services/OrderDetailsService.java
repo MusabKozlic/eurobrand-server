@@ -59,9 +59,13 @@ public class OrderDetailsService {
             orderProductEntity.setProduct(productEntity);
             orderProductEntity.setOrderDetails(orderDetailsEntity);
             orderProductEntity.setQuantity(productDto.getQuantity());
+            assert productEntity != null;
+            productEntity.setStock(productEntity.getStock() - productDto.getQuantity());
 
             productEntities.add(orderProductRepository.save(orderProductEntity));
 
+            orderProductRepository.save(orderProductEntity);
+            productRepository.save(productEntity);
         }
 
         String body = createMailText(productEntities, orderDetailsEntity);
