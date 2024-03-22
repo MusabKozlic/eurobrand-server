@@ -1,8 +1,15 @@
 package com.eurobrand.services;
 
+import com.eurobrand.dto.NewProductDto;
 import com.eurobrand.dto.ProductSearchDto;
+import com.eurobrand.entities.CategoryEntity;
+import com.eurobrand.entities.ImagesEntity;
 import com.eurobrand.entities.ProductEntity;
+import com.eurobrand.entities.ProductStatusEntity;
+import com.eurobrand.repositories.CategoryRepository;
+import com.eurobrand.repositories.ImageRepository;
 import com.eurobrand.repositories.ProductRepository;
+import com.eurobrand.repositories.ProductStatusRepository;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
@@ -22,6 +29,15 @@ import java.util.List;
 public class ProductService {
     @Autowired
     private ProductRepository repository;
+
+    @Autowired
+    private CategoryRepository categoryRepository;
+
+    @Autowired
+    private ProductStatusRepository productStatusRepository;
+
+    @Autowired
+    private ImageRepository imageRepository;
 
     @Transactional
     public List<ProductEntity> searchProducts(ProductSearchDto searchDto) {
@@ -60,5 +76,32 @@ public class ProductService {
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
         };
+    }
+
+    public void saveProduct(NewProductDto productDto) {
+        ProductEntity product = new ProductEntity();
+
+        product.setStock(Integer.valueOf(productDto.getStock()));
+        product.setModel(productDto.getModel());
+        product.setBrand(productDto.getBrand());
+        product.setPrice(productDto.getPrice());
+        product.setDescription(productDto.getDescription());
+
+        ProductStatusEntity productStatus = productStatusRepository.findById(productDto.getStatus()).orElse(null);
+        CategoryEntity category = categoryRepository.findById(productDto.getCategory()).orElse(null);
+
+        product.setProductStatusEntity(productStatus);
+        product.setCategory(category);
+
+        repository.save(product);
+
+        for(String image : productDto.getImages()){
+            ImagesEntity imagesEntity = new ImagesEntity();
+
+            imagesEntity.setProduct(product);
+            imagesEntity.setImageUrl(image);
+
+            imageRepository.save(imagesEntity);
+        }
     }
 }

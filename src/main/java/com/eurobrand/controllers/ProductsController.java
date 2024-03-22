@@ -1,5 +1,6 @@
 package com.eurobrand.controllers;
 
+import com.eurobrand.dto.NewProductDto;
 import com.eurobrand.dto.ProductDto;
 import com.eurobrand.dto.ProductSearchDto;
 import com.eurobrand.entities.CategoryEntity;
@@ -40,6 +41,11 @@ public class ProductsController {
         }
 
         return  productDtos;
+    }
+
+    @PostMapping("/save")
+    public void saveProduct(@RequestBody NewProductDto productDto) {
+        service.saveProduct(productDto);
     }
 
     @PostMapping("/products")
