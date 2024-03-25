@@ -1,22 +1,18 @@
 package com.eurobrand.services;
 
 import com.eurobrand.dto.NewProductDto;
+import com.eurobrand.dto.ProductDto;
 import com.eurobrand.dto.ProductSearchDto;
-import com.eurobrand.entities.CategoryEntity;
-import com.eurobrand.entities.ImagesEntity;
-import com.eurobrand.entities.ProductEntity;
-import com.eurobrand.entities.ProductStatusEntity;
-import com.eurobrand.repositories.CategoryRepository;
-import com.eurobrand.repositories.ImageRepository;
-import com.eurobrand.repositories.ProductRepository;
-import com.eurobrand.repositories.ProductStatusRepository;
+import com.eurobrand.entities.*;
+import com.eurobrand.repositories.*;
+import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Example;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +34,12 @@ public class ProductService {
 
     @Autowired
     private ImageRepository imageRepository;
+
+    @Autowired
+    private ImageService imageService;
+
+    @Autowired
+    private OrderProductRepository orderProductRepository;
 
     @Transactional
     public List<ProductEntity> searchProducts(ProductSearchDto searchDto) {
@@ -79,8 +81,8 @@ public class ProductService {
     }
 
     public void saveProduct(NewProductDto productDto) {
-        ProductEntity product = new ProductEntity();
-
+        ProductEntity product = productDto.getId() != null ? repository.findById(productDto.getId()).orElse(null) : new ProductEntity();
+    if(product != null){
         product.setStock(Integer.valueOf(productDto.getStock()));
         product.setModel(productDto.getModel());
         product.setBrand(productDto.getBrand());
@@ -93,7 +95,8 @@ public class ProductService {
         product.setProductStatusEntity(productStatus);
         product.setCategory(category);
 
-        repository.save(product);
+        repository.saveAndFlush(product);
+    }
 
         for(String image : productDto.getImages()){
             ImagesEntity imagesEntity = new ImagesEntity();
@@ -103,5 +106,79 @@ public class ProductService {
 
             imageRepository.save(imagesEntity);
         }
+    }
+
+    public List<ProductDto> getProductsByCategory(String category, String search, String status) {
+        List<ProductEntity> allProducts = repository.findAll(buildSpecificationByCategory(category, search, status));
+        List<ProductDto> productDtos = new ArrayList<>();
+
+        for(ProductEntity product : allProducts){
+            List<ImagesEntity> images = imageService.findImagesForThisProduct(product.getId());
+            ProductDto productDto = new ProductDto(product.getId(), product.getBrand(), product.getModel(), product.getDescription(), product.getStock(), product.getCategory(), product.getProductStatusEntity(),images ,product.getPrice());
+            productDtos.add(productDto);
+        }
+
+        return productDtos;
+    }
+
+    private Specification<ProductEntity> buildSpecificationByCategory(String category, String search, String status) {
+        return (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if(category != null) {
+                Join<ProductEntity, CategoryEntity> categoryJoin = root.join("category");
+                predicates.add(criteriaBuilder.equal(categoryJoin.get("slug"), category));
+            }
+            if (search != null && !search.isEmpty()) {
+                predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("brand")), "%" + search.toLowerCase() + "%"));
+            }
+            if (status != null && !status.isEmpty()) {
+                Join<ProductEntity, ProductStatusEntity> statusJoin = root.join("productStatusEntity");
+                predicates.add(criteriaBuilder.equal(criteriaBuilder.lower(statusJoin.get("status")), status.toLowerCase()));
+            }
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
+        };
+    }
+
+    public ProductDto getProductById(Integer id) {
+        ProductEntity product = repository.findById(id).orElse(null);
+            ProductDto productDto = new ProductDto();
+        if(product != null){
+            productDto.setId(product.getId());
+            productDto.setProductStatus(product.getProductStatusEntity());
+            productDto.setModel(product.getModel());
+            productDto.setDescription(product.getDescription());
+            productDto.setBrand(product.getBrand());
+            productDto.setCategory(product.getCategory());
+            productDto.setPrice(product.getPrice());
+            productDto.setStock(product.getStock());
+            List<ImagesEntity> images = imageService.findImagesForThisProduct(product.getId());
+            productDto.setImages(images);
+        }
+        return productDto;
+    }
+
+    public void deleteProductById(Integer productId) {
+        List<ImagesEntity> images = imageService.findImagesForThisProduct(productId);
+
+        imageRepository.deleteAll(images);
+        repository.deleteById(productId);
+    }
+
+    public List<OrderProductEntity> getProductsForOrder(Integer orderId) {
+        return orderProductRepository.findAll(buildSpecificationForOrderProducts(orderId));
+    }
+
+    private Specification<OrderProductEntity> buildSpecificationForOrderProducts(Integer orderId) {
+        return (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if(orderId != null) {
+                Join<OrderProductEntity, OrderDetailsEntity> orderJoin = root.join("orderDetails");
+                predicates.add(criteriaBuilder.equal(orderJoin.get("id"), orderId));
+            }
+            return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
+        };
     }
 }

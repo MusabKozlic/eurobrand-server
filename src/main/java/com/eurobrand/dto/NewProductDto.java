@@ -8,6 +8,7 @@ import java.util.List;
 @Getter
 @Setter
 public class NewProductDto {
+    private Integer id;
     private String brand;
     private String description;
     private String model;

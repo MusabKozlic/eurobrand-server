@@ -24,4 +24,7 @@ public class OrderDetailsEntity {
     private String city;
     private String postalCode;
     private String address;
+    @ManyToOne
+    @JoinColumn(name = "status_id")
+    private OrderStatusEntity orderStatus;
 }

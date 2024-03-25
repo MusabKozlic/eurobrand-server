@@ -15,5 +15,6 @@ public class ProductSearchDto {
     private String description;
     private Integer stock;
     private String category_id;
+    private String category;
     private String productStatus_id;
 }

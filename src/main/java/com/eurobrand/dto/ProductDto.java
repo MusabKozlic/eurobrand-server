@@ -32,4 +32,6 @@ public class ProductDto {
         this.images = images;
         this.price = price;
     }
+
+    public ProductDto() {}
 }

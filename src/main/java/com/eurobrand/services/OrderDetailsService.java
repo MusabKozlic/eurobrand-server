@@ -6,6 +6,7 @@ import com.eurobrand.entities.OrderDetailsEntity;
 import com.eurobrand.entities.OrderProductEntity;
 import com.eurobrand.entities.ProductEntity;
 import com.eurobrand.repositories.OrderDetailsRepository;
+import com.eurobrand.repositories.OrderDetailsStatusRepository;
 import com.eurobrand.repositories.OrderProductRepository;
 import com.eurobrand.repositories.ProductRepository;
 import jakarta.mail.MessagingException;
@@ -35,6 +36,9 @@ public class OrderDetailsService {
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private OrderDetailsStatusRepository orderDetailsStatusRepository;
 
     @Transactional
     public OrderDetailsEntity postOrder(OrderDetailsDto orderDetails) throws MessagingException {
@@ -112,4 +116,22 @@ public class OrderDetailsService {
         return sb.toString();
     }
 
+    public List<OrderDetailsEntity> getAllOrders() {
+        return repository.findAll();
+    }
+
+    public OrderDetailsEntity getOrderById(Integer id) {
+        return repository.findById(id).orElse(null);
+    }
+
+    public OrderDetailsEntity checkDeliveredOrder(Integer orderId) {
+        OrderDetailsEntity orderDetailsEntity = repository.findById(orderId).orElse(null);
+
+        if(orderDetailsEntity != null) {
+            orderDetailsEntity.setOrderStatus(orderDetailsStatusRepository.findById(2).orElse(null));
+        }
+
+        assert orderDetailsEntity != null;
+        return repository.saveAndFlush(orderDetailsEntity);
+    }
 }

@@ -3,10 +3,9 @@ package com.eurobrand.controllers;
 import com.eurobrand.dto.NewProductDto;
 import com.eurobrand.dto.ProductDto;
 import com.eurobrand.dto.ProductSearchDto;
-import com.eurobrand.entities.CategoryEntity;
 import com.eurobrand.entities.ImagesEntity;
+import com.eurobrand.entities.OrderProductEntity;
 import com.eurobrand.entities.ProductEntity;
-import com.eurobrand.repositories.ProductRepository;
 import com.eurobrand.services.ImageService;
 import com.eurobrand.services.ProductService;
 import lombok.Getter;
@@ -51,5 +50,25 @@ public class ProductsController {
     @PostMapping("/products")
     public List<ProductEntity> searchProducts(@RequestBody ProductSearchDto searchDto) {
         return service.searchProducts(searchDto);
+    }
+
+    @GetMapping("/{id}")
+    public ProductDto getProductById(@PathVariable String id) {
+        return service.getProductById(Integer.valueOf(id));
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteProductById(@PathVariable String id) {
+         service.deleteProductById(Integer.valueOf(id));
+    }
+
+    @GetMapping("/byCategory")
+    public List<ProductDto> getProductsByCategory(@RequestParam String category, @RequestParam String search, @RequestParam String status) {
+        return service.getProductsByCategory(category, search, status);
+    }
+
+    @GetMapping("/forOrder/{orderId}")
+    public List<OrderProductEntity> getProductsForOrder(@PathVariable String orderId) {
+        return service.getProductsForOrder(Integer.valueOf(orderId));
     }
 }

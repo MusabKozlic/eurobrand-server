@@ -25,4 +25,19 @@ public class OrderDetailsController {
     public OrderDetailsEntity postOrder(@RequestBody OrderDetailsDto order) throws MessagingException {
         return service.postOrder(order);
     }
+
+    @GetMapping
+    public List<OrderDetailsEntity> getOrders() {
+        return service.getAllOrders();
+    }
+
+    @GetMapping("/{id}")
+    public OrderDetailsEntity getOrderById(@PathVariable String id) {
+        return service.getOrderById(Integer.valueOf(id));
+    }
+
+    @PostMapping("/{id}/delivery")
+    public OrderDetailsEntity handleDelivery(@PathVariable String id) {
+        return service.checkDeliveredOrder(Integer.valueOf(id));
+    }
 }
