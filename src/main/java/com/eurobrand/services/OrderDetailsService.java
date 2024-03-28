@@ -75,7 +75,7 @@ public class OrderDetailsService {
         String body = createMailText(productEntities, orderDetailsEntity);
         String subject = "Eurobrand - online narudžba";
         String to = orderDetailsEntity.getEmail();
-        if(to != null && to != "") {
+        if(to != null && !to.isEmpty()) {
             emailService.sendEmail(to, subject, body);
         }
     }
@@ -87,7 +87,7 @@ public class OrderDetailsService {
         sb.append("<html><body>");
 
         // Add text content
-        sb.append("<h1> Postovani ").append(orderDetailsEntity.getFirstName()).append(" Hvala za Vašu narudžbu!</h1>");
+        sb.append("<h1> Postovani ").append(orderDetailsEntity.getFirstName()).append(", Hvala za Vašu narudžbu!</h1>");
         sb.append("<h2>").append("Vaša narudžba je zaprimljena!").append("</h2>");
         sb.append("<p>").append("Uskoro ćemo Vas kontaktirati").append("</p>");
 
