@@ -75,8 +75,9 @@ public class OrderDetailsService {
         String body = createMailText(productEntities, orderDetailsEntity);
         String subject = "Eurobrand - online narudžba";
         String to = orderDetailsEntity.getEmail();
-
-        emailService.sendEmail(to, subject, body);
+        if(to != null && to != "") {
+            emailService.sendEmail(to, subject, body);
+        }
     }
 
     private String createMailText(List<OrderProductEntity> productEntities, OrderDetailsEntity orderDetailsEntity) {
