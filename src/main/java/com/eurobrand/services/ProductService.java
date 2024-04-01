@@ -12,7 +12,6 @@ import jakarta.transaction.Transactional;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -40,6 +39,9 @@ public class ProductService {
 
     @Autowired
     private OrderProductRepository orderProductRepository;
+
+    @Autowired
+    private OrderProductsService orderProductsService;
 
     @Transactional
     public List<ProductEntity> searchProducts(ProductSearchDto searchDto) {
@@ -163,6 +165,7 @@ public class ProductService {
         List<ImagesEntity> images = imageService.findImagesForThisProduct(productId);
 
         imageRepository.deleteAll(images);
+        orderProductsService.deleteByProductId(productId);
         repository.deleteById(productId);
     }
 
