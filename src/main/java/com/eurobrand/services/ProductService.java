@@ -127,7 +127,7 @@ public class ProductService {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            if(category != null) {
+            if(category != null && !category.isEmpty()) {
                 Join<ProductEntity, CategoryEntity> categoryJoin = root.join("category");
                 predicates.add(criteriaBuilder.equal(categoryJoin.get("slug"), category));
             }
