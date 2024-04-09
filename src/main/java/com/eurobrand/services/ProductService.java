@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -100,13 +101,17 @@ public class ProductService {
         repository.saveAndFlush(product);
     }
 
+        assert product != null;
+        List<ImagesEntity> images = imageService.findImagesForThisProduct(product.getId());
+        imageService.deleteImages(images);
+
         for(String image : productDto.getImages()){
             ImagesEntity imagesEntity = new ImagesEntity();
 
             imagesEntity.setProduct(product);
             imagesEntity.setImageUrl(image);
 
-            imageRepository.save(imagesEntity);
+            imageService.saveImage(imagesEntity);
         }
     }
 

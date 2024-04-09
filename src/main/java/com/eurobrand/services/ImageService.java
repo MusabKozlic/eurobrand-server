@@ -5,7 +5,6 @@ import com.eurobrand.entities.ProductEntity;
 import com.eurobrand.repositories.ImageRepository;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
-import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -40,5 +39,13 @@ public class ImageService {
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
+    }
+
+    public void deleteImages(List<ImagesEntity> imagesEntity) {
+        repository.deleteAll(imagesEntity);
+    }
+
+    public void saveImage(ImagesEntity imagesEntity) {
+        repository.save(imagesEntity);
     }
 }
