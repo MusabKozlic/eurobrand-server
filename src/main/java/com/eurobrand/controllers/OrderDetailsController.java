@@ -1,5 +1,6 @@
 package com.eurobrand.controllers;
 import com.eurobrand.dto.OrderDetailsDto;
+import com.eurobrand.dto.ProductDto;
 import com.eurobrand.dto.ProductSearchDto;
 import com.eurobrand.entities.OrderDetailsEntity;
 import com.eurobrand.entities.ProductEntity;
@@ -34,6 +35,11 @@ public class OrderDetailsController {
     @GetMapping("/{id}")
     public OrderDetailsEntity getOrderById(@PathVariable String id) {
         return service.getOrderById(Integer.valueOf(id));
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteOrderById(@PathVariable String id) {
+        service.deleteOrderById(Integer.valueOf(id));
     }
 
     @PostMapping("/{id}/delivery")

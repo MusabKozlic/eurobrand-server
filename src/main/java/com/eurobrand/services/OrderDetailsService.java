@@ -10,11 +10,14 @@ import com.eurobrand.repositories.OrderDetailsStatusRepository;
 import com.eurobrand.repositories.OrderProductRepository;
 import com.eurobrand.repositories.ProductRepository;
 import jakarta.mail.MessagingException;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -33,6 +36,9 @@ public class OrderDetailsService {
 
     @Autowired
     private OrderProductRepository orderProductRepository;
+
+    @Autowired
+    private  OrderProductsService orderProductsService;
 
     @Autowired
     private EmailService emailService;
@@ -134,5 +140,14 @@ public class OrderDetailsService {
 
         assert orderDetailsEntity != null;
         return repository.saveAndFlush(orderDetailsEntity);
+    }
+
+    public void deleteOrderById(Integer orderId) {
+        deleteOrderProducts(orderId);
+        repository.deleteById(orderId);
+    }
+
+    private void deleteOrderProducts(Integer orderId) {
+        orderProductsService.deleteByOrderId(orderId);
     }
 }

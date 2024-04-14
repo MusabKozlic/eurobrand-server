@@ -1,5 +1,6 @@
 package com.eurobrand.services;
 
+import com.eurobrand.entities.OrderDetailsEntity;
 import com.eurobrand.entities.OrderProductEntity;
 import com.eurobrand.entities.ProductEntity;
 import com.eurobrand.repositories.OrderProductRepository;
@@ -26,6 +27,11 @@ public class OrderProductsService {
         repository.deleteAll(productEntityList);
     }
 
+    public void deleteByOrderId(Integer orderId) {
+        List<OrderProductEntity> productEntityList = repository.findAll(buildSpecificationForOrder(orderId));
+        repository.deleteAll(productEntityList);
+    }
+
     private Specification<OrderProductEntity> buildSpecification(Integer productId) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
@@ -33,6 +39,19 @@ public class OrderProductsService {
             if(productId != null) {
                 Join<OrderProductEntity, ProductEntity> productJoin = root.join("product");
                 predicates.add(criteriaBuilder.equal(productJoin.get("id"), productId));
+            }
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
+        };
+    }
+
+    private Specification<OrderProductEntity> buildSpecificationForOrder(Integer orderId) {
+        return (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if(orderId != null) {
+                Join<OrderProductEntity, OrderDetailsEntity> productJoin = root.join("orderDetails");
+                predicates.add(criteriaBuilder.equal(productJoin.get("id"), orderId));
             }
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
