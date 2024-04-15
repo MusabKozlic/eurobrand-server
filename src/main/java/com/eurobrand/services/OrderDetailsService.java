@@ -79,11 +79,30 @@ public class OrderDetailsService {
         }
 
         String body = createMailText(productEntities, orderDetailsEntity);
+        String bodyAdmin = createAdminMailText(orderDetailsEntity);
         String subject = "Eurobrand - online narudžba";
         String to = orderDetailsEntity.getEmail();
         if(to != null && !to.isEmpty()) {
             emailService.sendEmail(to, subject, body);
         }
+        emailService.sendEmail("prodajaeurobrand@gmail.com", subject, bodyAdmin);
+    }
+
+    private String createAdminMailText(OrderDetailsEntity orderDetailsEntity) {
+        StringBuilder sb = new StringBuilder();
+
+        // Start building the HTML content
+        sb.append("<html><body>");
+
+        // Add text content
+        sb.append("<h2>").append("Imate novu narudžbu!").append("</h2>");
+        sb.append("<p>").append("Za pregled narudžbe posjetite <a href=\"https://www.eurobrand.ba/admin/orders/" + orderDetailsEntity.getId() + "\">ovaj link</a>!").append("</p>");
+
+        sb.append("<p>Ovo je generički email.").append("</p>");
+            // Add closing tags
+        sb.append("</body></html>");
+
+        return sb.toString();
     }
 
     private String createMailText(List<OrderProductEntity> productEntities, OrderDetailsEntity orderDetailsEntity) {

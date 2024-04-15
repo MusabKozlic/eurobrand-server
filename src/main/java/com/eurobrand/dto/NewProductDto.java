@@ -12,7 +12,7 @@ public class NewProductDto {
     private String brand;
     private String description;
     private String model;
-    private String stock;
+    private Integer stock;
     private Integer category;
     private Integer status;
     private Integer price;
