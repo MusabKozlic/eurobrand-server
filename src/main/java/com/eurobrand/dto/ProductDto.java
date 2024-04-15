@@ -6,6 +6,7 @@ import com.eurobrand.entities.ProductStatusEntity;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -20,8 +21,9 @@ public class ProductDto {
     private ProductStatusEntity productStatus;
     private List<ImagesEntity> images;
     private Integer price;
+    private LocalDateTime timestamp;
 
-    public ProductDto(Integer id, String brand, String model, String description, Integer stock, CategoryEntity category, ProductStatusEntity productStatus, List<ImagesEntity> images, Integer price) {
+    public ProductDto(Integer id, String brand, String model, String description, Integer stock, CategoryEntity category, ProductStatusEntity productStatus, List<ImagesEntity> images, Integer price, LocalDateTime timestamp) {
         this.id = id;
         this.brand = brand;
         this.model = model;
@@ -31,6 +33,7 @@ public class ProductDto {
         this.productStatus = productStatus;
         this.images = images;
         this.price = price;
+        this.timestamp = timestamp;
     }
 
     public ProductDto() {}

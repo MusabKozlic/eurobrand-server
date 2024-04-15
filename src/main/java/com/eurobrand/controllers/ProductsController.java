@@ -35,10 +35,12 @@ public class ProductsController {
 
         for(ProductEntity product : allProducts){
             List<ImagesEntity> images = imageService.findImagesForThisProduct(product.getId());
-            ProductDto productDto = new ProductDto(product.getId(), product.getBrand(), product.getModel(), product.getDescription(), product.getStock(), product.getCategory(), product.getProductStatusEntity(),images ,product.getPrice());
+            ProductDto productDto = new ProductDto(product.getId(), product.getBrand(), product.getModel(), product.getDescription(), product.getStock(), product.getCategory(), product.getProductStatusEntity(),images ,product.getPrice(), product.getTimestamp());
             productDtos.add(productDto);
         }
 
+        // Sort productDtos by timestamp in descending order
+        productDtos.sort((p1, p2) -> p2.getTimestamp().compareTo(p1.getTimestamp()));
         return  productDtos;
     }
 

@@ -17,6 +17,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -143,7 +144,18 @@ public class OrderDetailsService {
     }
 
     public List<OrderDetailsEntity> getAllOrders() {
-        return repository.findAll();
+        return repository.findAll(buildSpecifications());
+    }
+
+    private Specification<OrderDetailsEntity> buildSpecifications() {
+        return (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            // Add order by clause
+            query.orderBy(criteriaBuilder.desc(root.get("timestamp")));
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
+        };
     }
 
     public OrderDetailsEntity getOrderById(Integer id) {
