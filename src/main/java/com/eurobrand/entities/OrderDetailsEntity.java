@@ -29,4 +29,5 @@ public class OrderDetailsEntity {
     @JoinColumn(name = "status_id")
     private OrderStatusEntity orderStatus;
     private LocalDateTime timestamp;
+    private Boolean hasSeen;
 }

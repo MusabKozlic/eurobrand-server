@@ -46,4 +46,14 @@ public class OrderDetailsController {
     public OrderDetailsEntity handleDelivery(@PathVariable String id) {
         return service.checkDeliveredOrder(Integer.valueOf(id));
     }
+
+    @GetMapping("newOrders")
+    public List<OrderDetailsEntity> newOrders() {
+        return service.getAllNewOrders();
+    }
+
+    @PutMapping("markSeen/{orderId}")
+    public void markSeen(@PathVariable Integer orderId) {
+        service.markSeenOrder(orderId);
+    }
 }

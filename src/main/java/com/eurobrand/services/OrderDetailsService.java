@@ -21,6 +21,7 @@ import org.springframework.data.domain.Example;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,7 +52,7 @@ public class OrderDetailsService {
     public OrderDetailsEntity postOrder(OrderDetailsDto orderDetails) throws MessagingException {
         OrderDetailsEntity orderDetailsEntity = orderDetails.getOrder();
 
-
+        orderDetailsEntity.setTimestamp(LocalDateTime.now());
         OrderDetailsEntity order = repository.save(orderDetailsEntity);
 
         handleProductSave(orderDetails.getProducts(), order);
@@ -158,6 +159,17 @@ public class OrderDetailsService {
         };
     }
 
+    private Specification<OrderDetailsEntity> buildSpecificationsForNewOrders() {
+        return (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            // Add filter where column hasSeen is false
+            predicates.add(criteriaBuilder.isFalse(root.get("hasSeen")));
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
+        };
+    }
+
     public OrderDetailsEntity getOrderById(Integer id) {
         return repository.findById(id).orElse(null);
     }
@@ -180,5 +192,17 @@ public class OrderDetailsService {
 
     private void deleteOrderProducts(Integer orderId) {
         orderProductsService.deleteByOrderId(orderId);
+    }
+
+    public List<OrderDetailsEntity> getAllNewOrders() {
+        return repository.findAll(buildSpecificationsForNewOrders());
+    }
+
+    public void markSeenOrder(Integer orderId) {
+        OrderDetailsEntity order = repository.findById(orderId).orElse(null);
+        if(order != null) {
+            order.setHasSeen(true);
+            repository.save(order);
+        }
     }
 }
