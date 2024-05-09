@@ -11,6 +11,7 @@ public class NewProductDto {
     private Integer id;
     private String brand;
     private String description;
+    private String descriptionUrl;
     private String model;
     private Integer stock;
     private Integer category;

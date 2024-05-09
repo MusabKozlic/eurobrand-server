@@ -19,6 +19,7 @@ public class ProductEntity {
     private String brand;
     private String model;
     private String description;
+    private String descriptionUrl;
     private Integer stock;
     private Integer price;
     @JoinColumn(name = "category_id")

@@ -1,5 +1,6 @@
 package com.eurobrand.controllers;
 
+import com.eurobrand.dto.BannerDto;
 import com.eurobrand.dto.NewProductDto;
 import com.eurobrand.dto.ProductDto;
 import com.eurobrand.dto.ProductSearchDto;
@@ -11,10 +12,12 @@ import com.eurobrand.services.ProductService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.Banner;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @RestController
@@ -35,7 +38,7 @@ public class ProductsController {
 
         for(ProductEntity product : allProducts){
             List<ImagesEntity> images = imageService.findImagesForThisProduct(product.getId());
-            ProductDto productDto = new ProductDto(product.getId(), product.getBrand(), product.getModel(), product.getDescription(), product.getStock(), product.getCategory(), product.getProductStatusEntity(),images ,product.getPrice(), product.getTimestamp());
+            ProductDto productDto = new ProductDto(product.getId(), product.getBrand(), product.getModel(), product.getDescription(), product.getDescriptionUrl(), product.getStock(), product.getCategory(), product.getProductStatusEntity(),images ,product.getPrice(), product.getTimestamp());
             productDtos.add(productDto);
         }
 
@@ -43,6 +46,12 @@ public class ProductsController {
         productDtos.sort((p1, p2) -> p2.getTimestamp().compareTo(p1.getTimestamp()));
         return  productDtos;
     }
+
+    @GetMapping("/banner")
+    public List<BannerDto> getBannerData() {
+        return service.getBannerData();
+    }
+
 
     @PostMapping("/save")
     public void saveProduct(@RequestBody NewProductDto productDto) {
@@ -65,8 +74,8 @@ public class ProductsController {
     }
 
     @GetMapping("/byCategory")
-    public List<ProductDto> getProductsByCategory(@RequestParam String category, @RequestParam String search, @RequestParam String status) {
-        return service.getProductsByCategory(category, search, status);
+    public List<ProductDto> getProductsByCategory(@RequestParam String category, @RequestParam String search, @RequestParam String status, @RequestParam String sortStatus) {
+        return service.getProductsByCategory(category, search, status, sortStatus);
     }
 
     @GetMapping("/forOrder/{orderId}")

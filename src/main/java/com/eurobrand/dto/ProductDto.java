@@ -16,6 +16,7 @@ public class ProductDto {
     private String brand;
     private String model;
     private String description;
+    private String descriptionUrl;
     private Integer stock;
     private CategoryEntity category;
     private ProductStatusEntity productStatus;
@@ -23,11 +24,12 @@ public class ProductDto {
     private Integer price;
     private LocalDateTime timestamp;
 
-    public ProductDto(Integer id, String brand, String model, String description, Integer stock, CategoryEntity category, ProductStatusEntity productStatus, List<ImagesEntity> images, Integer price, LocalDateTime timestamp) {
+    public ProductDto(Integer id, String brand, String model, String description, String descriptionUrl, Integer stock, CategoryEntity category, ProductStatusEntity productStatus, List<ImagesEntity> images, Integer price, LocalDateTime timestamp) {
         this.id = id;
         this.brand = brand;
         this.model = model;
         this.description = description;
+        this.descriptionUrl = descriptionUrl;
         this.stock = stock;
         this.category = category;
         this.productStatus = productStatus;

@@ -1,5 +1,6 @@
 package com.eurobrand.services;
 
+import com.eurobrand.dto.BannerDto;
 import com.eurobrand.dto.NewProductDto;
 import com.eurobrand.dto.ProductDto;
 import com.eurobrand.dto.ProductSearchDto;
@@ -12,14 +13,16 @@ import jakarta.transaction.Transactional;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -96,6 +99,7 @@ public class ProductService {
         product.setBrand(productDto.getBrand());
         product.setPrice(productDto.getPrice());
         product.setDescription(productDto.getDescription());
+        product.setDescriptionUrl(productDto.getDescriptionUrl());
         product.setTimestamp(LocalDateTime.now());
         ProductStatusEntity productStatus = productStatusRepository.findById(productDto.getStatus()).orElse(null);
         CategoryEntity category = categoryRepository.findById(productDto.getCategory()).orElse(null);
@@ -120,23 +124,25 @@ public class ProductService {
         }
     }
 
-    public List<ProductDto> getProductsByCategory(String category, String search, String status) {
-        List<ProductEntity> allProducts = repository.findAll(buildSpecificationByCategory(category, search, status));
+    public List<ProductDto> getProductsByCategory(String category, String search, String status, String sortStatus) {
+        List<ProductEntity> allProducts = repository.findAll(buildSpecificationByCategory(category, search, status, sortStatus));
         List<ProductDto> productDtos = new ArrayList<>();
 
         for(ProductEntity product : allProducts){
             List<ImagesEntity> images = imageService.findImagesForThisProduct(product.getId());
-            ProductDto productDto = new ProductDto(product.getId(), product.getBrand(), product.getModel(), product.getDescription(), product.getStock(), product.getCategory(), product.getProductStatusEntity(),images ,product.getPrice(), product.getTimestamp());
+            ProductDto productDto = new ProductDto(product.getId(), product.getBrand(), product.getModel(), product.getDescription(), product.getDescriptionUrl(), product.getStock(), product.getCategory(), product.getProductStatusEntity(),images ,product.getPrice(), product.getTimestamp());
             productDtos.add(productDto);
         }
 
         // Sort productDtos by timestamp in descending order
-        productDtos.sort((p1, p2) -> p2.getTimestamp().compareTo(p1.getTimestamp()));
+        if(sortStatus == null || sortStatus.isEmpty()){
+            productDtos.sort((p1, p2) -> p2.getTimestamp().compareTo(p1.getTimestamp()));
+        }
 
         return productDtos;
     }
 
-    private Specification<ProductEntity> buildSpecificationByCategory(String category, String search, String status) {
+    private Specification<ProductEntity> buildSpecificationByCategory(String category, String search, String status, String sortStatus) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
@@ -145,11 +151,30 @@ public class ProductService {
                 predicates.add(criteriaBuilder.equal(categoryJoin.get("slug"), category));
             }
             if (search != null && !search.isEmpty()) {
-                predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("brand")), "%" + search.toLowerCase() + "%"));
+                String[] searchTerms = search.toLowerCase().split("\\s+"); // Split search term by spaces
+
+                List<Predicate> searchPredicates = new ArrayList<>();
+                for (String term : searchTerms) {
+                    Predicate brandPredicate = criteriaBuilder.like(criteriaBuilder.lower(root.get("brand")), "%" + term + "%");
+                    Predicate modelPredicate = criteriaBuilder.like(criteriaBuilder.lower(root.get("model")), "%" + term + "%");
+                    Predicate descriptionPredicate = criteriaBuilder.like(criteriaBuilder.lower(root.get("description")), "%" + term + "%");
+
+                    Predicate termPredicate = criteriaBuilder.or(brandPredicate, modelPredicate, descriptionPredicate);
+                    searchPredicates.add(termPredicate);
+                }
+
+                predicates.add(criteriaBuilder.and(searchPredicates.toArray(new Predicate[searchPredicates.size()])));
             }
             if (status != null && !status.isEmpty()) {
                 Join<ProductEntity, ProductStatusEntity> statusJoin = root.join("productStatusEntity");
                 predicates.add(criteriaBuilder.equal(criteriaBuilder.lower(statusJoin.get("status")), status.toLowerCase()));
+            }
+
+            // Order by sortStatus
+            if ("asc".equalsIgnoreCase(sortStatus)) {
+                query.orderBy(criteriaBuilder.asc(root.get("price")));
+            } else if ("desc".equalsIgnoreCase(sortStatus)) {
+                query.orderBy(criteriaBuilder.desc(root.get("price")));
             }
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
@@ -196,5 +221,28 @@ public class ProductService {
             }
             return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
         };
+    }
+
+    public List<BannerDto> getBannerData() {
+        List<ImagesEntity> images = imageRepository.findAll();
+
+        // Group images by product ID and collect the first image URL for each product
+        Map<Integer, String> productImages = images.stream()
+                .collect(Collectors.toMap(
+                        image -> image.getProduct().getId(),
+                        ImagesEntity::getImageUrl,
+                        (url1, url2) -> url1 // Merge function to keep the first URL
+                ));
+
+        // Create BannerDto objects from the grouped data
+        List<BannerDto> bannerDtos = new ArrayList<>();
+        productImages.forEach((productId, imageUrl) -> {
+            BannerDto bannerDto = new BannerDto();
+            bannerDto.setProductId(productId);
+            bannerDto.setBannerImageUrl(imageUrl);
+            bannerDtos.add(bannerDto);
+        });
+
+        return bannerDtos;
     }
 }
