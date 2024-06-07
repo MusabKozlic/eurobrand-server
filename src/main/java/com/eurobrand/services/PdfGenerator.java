@@ -47,7 +47,7 @@ public class PdfGenerator {
             LocalDate paymentDeadline = today.plusDays(30);
 
             // Define fonts
-            String fontPath = "src/main/resources/fonts/Roboto-Regular.ttf";
+            String fontPath = "https://eurobrand.ba/fonts/Roboto-Regular.ttf";
             PdfFont font = PdfFontFactory.createFont(fontPath, PdfEncodings.IDENTITY_H);
 
             // Header section
