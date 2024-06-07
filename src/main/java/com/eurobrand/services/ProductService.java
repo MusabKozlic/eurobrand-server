@@ -146,25 +146,46 @@ public class ProductService {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            if(category != null && !category.isEmpty()) {
+            if (category != null && !category.isEmpty()) {
                 Join<ProductEntity, CategoryEntity> categoryJoin = root.join("category");
-                predicates.add(criteriaBuilder.equal(categoryJoin.get("slug"), category));
+
+                if ("računarska oprema".equals(category)) {
+                    List<String> racunarskaOpremaSlugs = Arrays.asList(
+                            "adapteri", "misevi", "projektori", "diskovi", "tastature", "graficke kartice", "računarska oprema"
+                    );
+                    predicates.add(categoryJoin.get("slug").in(racunarskaOpremaSlugs));
+                } else if ("laptopi".equals(category)) {
+                    List<String> laptopiSlugs = Arrays.asList(
+                            "laptopi novi", "brandname laptopi", "surface", "tableti", "laptopi"
+                    );
+                    predicates.add(categoryJoin.get("slug").in(laptopiSlugs));
+                } else if ("racunari".equals(category)) {
+                    List<String> racunariSlugs = Arrays.asList(
+                            "racunari novi", "gaming racunari", "brandname racunari", "workstation", "all-in-one", "racunari"
+                    );
+                    predicates.add(categoryJoin.get("slug").in(racunariSlugs));
+                } else {
+                    predicates.add(criteriaBuilder.equal(categoryJoin.get("slug"), category));
+                }
             }
+
             if (search != null && !search.isEmpty()) {
                 String[] searchTerms = search.toLowerCase().split("\\s+"); // Split search term by spaces
 
                 List<Predicate> searchPredicates = new ArrayList<>();
                 for (String term : searchTerms) {
-                    Predicate brandPredicate = criteriaBuilder.like(criteriaBuilder.lower(root.get("brand")), "%" + term + "%");
-                    Predicate modelPredicate = criteriaBuilder.like(criteriaBuilder.lower(root.get("model")), "%" + term + "%");
-                    Predicate descriptionPredicate = criteriaBuilder.like(criteriaBuilder.lower(root.get("description")), "%" + term + "%");
+                    List<Predicate> termPredicates = new ArrayList<>();
+                    termPredicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("brand")), "%" + term + "%"));
+                    termPredicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("model")), "%" + term + "%"));
 
-                    Predicate termPredicate = criteriaBuilder.or(brandPredicate, modelPredicate, descriptionPredicate);
-                    searchPredicates.add(termPredicate);
+                    // Combine all predicates for this term using OR
+                    searchPredicates.add(criteriaBuilder.or(termPredicates.toArray(new Predicate[termPredicates.size()])));
                 }
 
+                // Combine all term predicates using AND
                 predicates.add(criteriaBuilder.and(searchPredicates.toArray(new Predicate[searchPredicates.size()])));
             }
+
             if (status != null && !status.isEmpty()) {
                 Join<ProductEntity, ProductStatusEntity> statusJoin = root.join("productStatusEntity");
                 predicates.add(criteriaBuilder.equal(criteriaBuilder.lower(statusJoin.get("status")), status.toLowerCase()));
@@ -180,6 +201,7 @@ public class ProductService {
             return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
         };
     }
+
 
     public ProductDto getProductById(Integer id) {
         ProductEntity product = repository.findById(id).orElse(null);

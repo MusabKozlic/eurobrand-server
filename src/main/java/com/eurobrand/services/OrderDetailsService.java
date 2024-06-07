@@ -1,7 +1,9 @@
 package com.eurobrand.services;
 
+import com.eurobrand.dto.FormValues;
 import com.eurobrand.dto.OrderDetailsDto;
 import com.eurobrand.dto.OrderDetailsProductDto;
+import com.eurobrand.dto.Predracun;
 import com.eurobrand.entities.OrderDetailsEntity;
 import com.eurobrand.entities.OrderProductEntity;
 import com.eurobrand.entities.ProductEntity;
@@ -10,14 +12,12 @@ import com.eurobrand.repositories.OrderDetailsStatusRepository;
 import com.eurobrand.repositories.OrderProductRepository;
 import com.eurobrand.repositories.ProductRepository;
 import jakarta.mail.MessagingException;
-import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -203,6 +203,17 @@ public class OrderDetailsService {
         if(order != null) {
             order.setHasSeen(true);
             repository.save(order);
+        }
+    }
+
+    public void sendInvoiceEmail(String to, FormValues formValues, Predracun[] bills) {
+        try {
+            String subject = "Predracun - Eurobrand";
+            String body = "<h1>Predracun za online narudzbu</h1><p>U prilogu se nalaze detalji narudzbe.</p>";
+
+            emailService.sendEmailWithPdf(to, subject, body, formValues, bills);
+        } catch (MessagingException e) {
+            // Handle exception
         }
     }
 }

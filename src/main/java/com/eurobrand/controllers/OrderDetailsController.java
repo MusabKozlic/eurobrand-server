@@ -1,7 +1,5 @@
 package com.eurobrand.controllers;
-import com.eurobrand.dto.OrderDetailsDto;
-import com.eurobrand.dto.ProductDto;
-import com.eurobrand.dto.ProductSearchDto;
+import com.eurobrand.dto.*;
 import com.eurobrand.entities.OrderDetailsEntity;
 import com.eurobrand.entities.ProductEntity;
 import com.eurobrand.services.OrderDetailsService;
@@ -55,5 +53,11 @@ public class OrderDetailsController {
     @PutMapping("markSeen/{orderId}")
     public void markSeen(@PathVariable Integer orderId) {
         service.markSeenOrder(orderId);
+    }
+
+    @PostMapping("sendEmailWithPdf")
+    public void sendEmailWithPdf(@RequestBody PredracunRequest request) {
+        service.sendInvoiceEmail("prodajaeurobrand@gmail.com", request.getFormValues(), request.getNewArray());
+        service.sendInvoiceEmail(request.getFormValues().getContactEmail(), request.getFormValues(), request.getNewArray());
     }
 }
