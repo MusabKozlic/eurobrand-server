@@ -38,6 +38,12 @@
 			<groupId>com.itextpdf</groupId>
 			<artifactId>itext7-core</artifactId>
 			<version>7.1.16</version>
+			<exclusions>
+				<exclusion>
+					<groupId>group-to-exclude</groupId>
+					<artifactId>artifact-to-exclude</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
