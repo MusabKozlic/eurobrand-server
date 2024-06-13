@@ -32,8 +32,8 @@ public class ProductsController {
     private ImageService imageService;
 
     @GetMapping
-    public List<ProductDto> getAllProductsWithImages() {
-        List<ProductEntity> allProducts = service.getRepository().findAll();
+    public List<ProductDto> getAllProductsWithImages(@RequestParam(required = false) String searchParams) {
+        List<ProductEntity> allProducts = service.findAllProducts(searchParams);
         List<ProductDto> productDtos = new ArrayList<>();
 
         for(ProductEntity product : allProducts){

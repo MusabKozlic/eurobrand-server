@@ -142,7 +142,31 @@ public class ProductService {
         return productDtos;
     }
 
-    private Specification<ProductEntity> buildSpecificationByCategory(String category, String search, String status, String sortStatus) {
+    private Specification<ProductEntity> buildSpecificationByCategory(String searchParams) {
+        return (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (searchParams != null && !searchParams.isEmpty()) {
+                String[] searchTerms = searchParams.toLowerCase().split("\\s+"); // Split search term by spaces
+
+                List<Predicate> searchPredicates = new ArrayList<>();
+                for (String term : searchTerms) {
+                    List<Predicate> termPredicates = new ArrayList<>();
+                    termPredicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("brand")), "%" + term + "%"));
+                    termPredicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("model")), "%" + term + "%"));
+
+                    // Combine all predicates for this term using OR
+                    searchPredicates.add(criteriaBuilder.or(termPredicates.toArray(new Predicate[termPredicates.size()])));
+                }
+
+                // Combine all term predicates using AND
+                predicates.add(criteriaBuilder.and(searchPredicates.toArray(new Predicate[searchPredicates.size()])));
+            }
+            return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
+        };
+    }
+
+        private Specification<ProductEntity> buildSpecificationByCategory(String category, String search, String status, String sortStatus) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
@@ -266,5 +290,9 @@ public class ProductService {
         });
 
         return bannerDtos;
+    }
+
+    public List<ProductEntity> findAllProducts(String searchParam) {
+        return repository.findAll(buildSpecificationByCategory(searchParam));
     }
 }

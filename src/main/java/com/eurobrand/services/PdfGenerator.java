@@ -51,11 +51,6 @@ public class PdfGenerator {
             PdfFont font = PdfFontFactory.createFont(fontPath, PdfEncodings.IDENTITY_H);
 
             // Header section
-            Paragraph header2 = new Paragraph("Skladište: 01 PJ SKLADIŠTE")
-                    .setFont(font)
-                    .setFontSize(10)
-                    .setFontColor(blackColor)
-                    .setTextAlignment(TextAlignment.CENTER);
 
             Paragraph header3 = new Paragraph()
                     .setFont(font)
@@ -70,7 +65,7 @@ public class PdfGenerator {
             header3.add("ID broj PU: " + formValues.getIdNumberPU());
 
 
-            Paragraph header1 = new Paragraph("EUROBRAND d.o.o. Zenica\nBulevar Kralja Tvrtka I, 72000 Zenica\nTel/Fax: Telefon:\nRegistrirano kod pod brojem:\nPDV broj: 218905960008; ID broj PU: 4218905960032\nTransakcijski računi (KM): 1413555320010481\n1610000176850023, 3385802253019073")
+            Paragraph header1 = new Paragraph("EUROBRAND d.o.o. Zenica\nTrg Alije Izetbegovića 69, 72000 Zenica\nTel/Fax: Telefon:\nRegistrirano kod pod brojem:\nPDV broj: 218905960008; ID broj PU: 4218905960008\nTransakcijski računi (KM): 1413555320010481\n1610000176850023, 3385802253019073")
                     .setFont(font)
                     .setFontSize(10)
                     .setFontColor(blackColor)
@@ -85,7 +80,6 @@ public class PdfGenerator {
             document.add(header1);
             document.add(separator);
             document.add(new Paragraph("\n"));
-            document.add(header2);
             document.add(new Paragraph("\n"));
             document.add(header3);
 
